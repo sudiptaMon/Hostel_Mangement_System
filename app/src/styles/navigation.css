@@ -1,0 +1,37 @@
+.Nav-container {
+    padding: 5px;
+    display: flex;
+    flex-direction: row;
+    width: 99.2vw;
+    justify-content: space-evenly;
+    height: 50px;
+    align-items: center;
+   
+    background-color:   rgb(255, 255, 255);    
+    /* margin-left: 1px; */
+    /* border-radius: 5px; */
+    position: sticky;
+}
+
+.logo {
+    display: flex;
+    flex-direction: row;
+}
+
+.Navigetors {
+    margin-left: auto;
+}
+
+ul li {
+    display: inline;
+    margin: 10px;
+    font-family:'Courier New', Courier, monospace;
+    color: black;
+    font-weight:600;
+    font-style: normal;
+    
+}
+ul li :hover{
+    text-decoration: underline;
+}
+

@@ -1,0 +1,64 @@
+.card {
+  width: 250px;
+  height: 135px;
+  position: relative;
+  padding: 25px;
+  background: radial-gradient(
+      178.94% 106.41% at 26.42% 106.41%,
+      #f2f1e8 0%,
+      rgba(255, 255, 255, 0) 71.88%
+    ),
+    #a8a3bc;
+  /* box-shadow: 0px 155px 62px rgba(0, 0, 0, 0.01),
+    0px 87px 52px rgba(0, 0, 0, 0.05), 0px 39px 39px rgba(0, 0, 0, 0.09),
+    0px 10px 21px rgba(0, 0, 0, 0.1), 0px 0px 0px rgba(0, 0, 0, 0.1); */
+  border-radius: 23px;
+  transition: all 0.8s cubic-bezier(0.15, 0.83, 0.66, 1);
+  cursor: pointer;
+}
+
+.card:hover {
+  transform: scale(0.9);
+}
+
+.card-header {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.card-header span:first-child {
+  word-break: break-all;
+  font-weight: 800;
+  font-size: 20px;
+  /* line-height: 135%; */
+  color: black;
+}
+
+.card-header span:last-child {
+  font-weight: 700;
+  font-size: 15px;
+  line-height: 135%;
+  color: rgba(67, 65, 65, 0.849);
+}
+
+.more {
+  width: 80px;
+  height: 36px;
+  position: absolute;
+  right: 25px;
+  bottom: 25px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgb(118, 86, 235);
+
+  border-radius: 9px;
+}
+
+.more span {
+  font-weight: 700;
+  font-size: 13px;
+  line-height: 134.49%;
+  color: rgb(255, 255, 255);
+}
