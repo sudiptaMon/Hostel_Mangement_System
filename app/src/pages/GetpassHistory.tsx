@@ -39,7 +39,6 @@ const GatepassHistory = () => {
     useEffect(() => {
         const getGatepassData = async () => {
             try {
-
                 let response = await axios.get("http://localhost:5000/Student/gatepass-history", { withCredentials: true });
                 if (!response) {
                     return;
