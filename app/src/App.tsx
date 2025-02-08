@@ -72,6 +72,7 @@ function App() {
             <Route path="apply-gatepass" element={isAuth && isStudent ? <Getpass /> : <Login setAuth={setAuth} setUser={setUser} />}></Route>
             <Route path="manu" element={isAuth && isStudent ? <Manu /> : <Login setAuth={setAuth} setUser={setUser} />}></Route>
             <Route path="fees" element={isAuth && isStudent ? <Fees /> : <Login setAuth={setAuth} setUser={setUser} />}></Route>
+            <Route path="complaints" element={isAuth && isStudent ? <Fees /> : <Login setAuth={setAuth} setUser={setUser} />}></Route>
           </Route>
           <Route path="/Admin">
             <Route path="home" element={isAdmin && isAuth ? <Home user={userData} /> : <Login setAuth={setAuth} setUser={setUser} />}></Route>
