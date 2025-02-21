@@ -13,12 +13,13 @@ const admin_router = require("./Router/adminRoute");
 const cookie_parser = require("cookie-parser");
 const jwt = require("jsonwebtoken");
 
-client.connect("mongodb://localhost:27017/HMS").then(() => {
+client.connect(`${process.env.DB_URI}`).then(() => {
   console.log("DB Connected");
 });
 app.use(
   cors({
     origin: "http://localhost:3000",
+    methods: ["GET", "POST", "PUT", "DELETE"],
     credentials: true,
   })
 );

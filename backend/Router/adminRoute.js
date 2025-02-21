@@ -3,6 +3,7 @@ const router = express.Router();
 const admin = require("../schema/admin");
 const user = require("../schema/user");
 const gatepass = require("../schema/gatepass");
+const checkDatabase = require("../validators/checkDatabase");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const bodyParser = require("body-parser");
@@ -38,6 +39,23 @@ router.post("/login", async (req, res) => {
 router.post("/createuser", async (req, res) => {
   try {
     const { name, email, password, username, room, batch } = req.body;
+
+    if (req.body == {}) {
+      return res.status(400).json({
+        added: false,
+        massage: "No data Entered !",
+      });
+    }
+    const isUserExists = await checkDatabase.isUserExists(username);
+    
+    if (isUserExists) {
+      return res.status(200).json({
+        added: false,
+        username,
+        message: "Already existed user.",
+      });
+    }
+    
     let createdUser = await user.create({
       name,
       username,
@@ -53,10 +71,12 @@ router.post("/createuser", async (req, res) => {
       name,
       username,
     });
-    res.status(200).json({ added: true });
+    res.status(200).json({ added: true, username,massage: "Is added to the database." });
   } catch (e) {
     console.log(e);
-    res.status(500).json({ added: false });
+    res
+      .status(500)
+      .json({ added: false, message: "Can't be added. Something went wrong" });
   }
 });
 
