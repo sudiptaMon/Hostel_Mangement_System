@@ -4,6 +4,8 @@ const admin = require("../schema/admin");
 const user = require("../schema/user");
 const gatepass = require("../schema/gatepass");
 const checkDatabase = require("../validators/checkDatabase");
+const checkUser = require("../common/checkuser");
+const constants = require("../constants/constants");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const bodyParser = require("body-parser");
@@ -19,9 +21,12 @@ router.post("/login", async (req, res) => {
   if (!response) {
     return res.send({ status: false });
   }
-  if (!bcrypt.compareSync(password, response.password)) {
+  if (password != response.password) {
     return res.send({ status: false });
   }
+  // if (!bcrypt.compareSync(password, response.password)) {
+  //   return res.send({ status: false });
+  // }
   response.password = undefined;
   let token = jwt.sign({ ...response }, process.env.SECRET_KEY, {
     expiresIn: "24h",
@@ -47,15 +52,15 @@ router.post("/createuser", async (req, res) => {
       });
     }
     const isUserExists = await checkDatabase.isUserExists(username);
-    
+
     if (isUserExists) {
-      return res.status(200).json({
+      return res.status(constants.SUCCESS).json({
         added: false,
         username,
         message: "Already existed user.",
       });
     }
-    
+
     let createdUser = await user.create({
       name,
       username,
@@ -71,41 +76,50 @@ router.post("/createuser", async (req, res) => {
       name,
       username,
     });
-    res.status(200).json({ added: true, username,massage: "Is added to the database." });
+    res
+      .status(200)
+      .json({ added: true, username, massage: "Is added to the database." });
   } catch (e) {
     console.log(e);
     res
-      .status(500)
+      .status(constants.SERVERERROR)
       .json({ added: false, message: "Can't be added. Something went wrong" });
   }
 });
 
 router.get("/gatepass", async (req, res) => {
-  let allgatepass = await gatepass.find({});
-  let todayDate =
-    date.getDate() + "/" + (date.getMonth() + 1) + "/" + date.getFullYear();
-  let gatepassHistory = [];
-  allgatepass.forEach((ele) => {
-    let temp = ele.history.filter((obj) => {
-      return obj.todayDate === todayDate && obj.status === "PENDING";
-    });
+  try {
+    if (!checkUser(req)) {
+      return res.status(constants.UNAUTHORISED).json({ added: false });
+    }
+    let allgatepass = await gatepass.find({});
+    let todayDate =
+      date.getDate() + "/" + (date.getMonth() + 1) + "/" + date.getFullYear();
+    let gatepassHistory = [];
+    allgatepass.forEach((ele) => {
+      let temp = ele.history.filter((obj) => {
+        return obj.todayDate === todayDate && obj.status === "PENDING";
+      });
 
-    temp.forEach((obj) => {
-      obj.userid = ele.userid;
-      obj.username = ele.username;
-      obj.name = ele.name;
+      temp.forEach((obj) => {
+        obj.userid = ele.userid;
+        obj.username = ele.username;
+        obj.name = ele.name;
+      });
+      gatepassHistory = [...gatepassHistory, ...temp];
     });
-    gatepassHistory = [...gatepassHistory, ...temp];
-  });
-  res.json(gatepassHistory);
+    res.json(gatepassHistory);
+  } catch (err) {
+    console.log(err);
+  }
 });
 
 router.post("/approvegatepass", async (req, res) => {
   let { userid, id, approved, comment } = req.body;
   try {
     let token = req.cookies.isUser;
-    if (!token) {
-      return res.status(404).json({ done: false });
+    if (!checkUser(req)) {
+      return res.status(constants.UNAUTHORISED).json({ done: false });
     }
     let admin = await jwt.verify(token, process.env.SECRET_KEY)._doc;
     let gatepassEntity = await gatepass.findOne({ userid: userid });
@@ -122,7 +136,7 @@ router.post("/approvegatepass", async (req, res) => {
       }
     });
     await gatepass.updateOne({ userid: userid }, { history: gatepassOfUser });
-    res.status(200).json({ done: true });
+    res.status(constants.SUCCESS).json({ done: true });
   } catch (err) {
     console.log(err);
   }
@@ -132,13 +146,13 @@ router.post("/rejectgatepass", async (req, res) => {
   let { userid, id, approved, comment } = req.body;
   try {
     let token = req.cookies.isUser;
-    if (!token) {
-      return res.status(404).json({ done: false });
+    if (!checkUser(req)) {
+      return res.status(constants.UNAUTHORISED).json({ done: false });
     }
     let admin = await jwt.verify(token, process.env.SECRET_KEY)._doc;
     let gatepassEntity = await gatepass.findOne({ userid: userid });
     if (!gatepassEntity) {
-      res.status(404).json({ done: false });
+      res.status(constants.NOTFOUND).json({ done: false });
     }
     let gatepassOfUser = gatepassEntity.history;
 
@@ -150,7 +164,7 @@ router.post("/rejectgatepass", async (req, res) => {
       }
     });
     await gatepass.updateOne({ userid: userid }, { history: gatepassOfUser });
-    res.status(200).json({ done: true });
+    res.status(constants.SUCCESS).json({ done: true });
   } catch (err) {
     console.log(err);
   }
