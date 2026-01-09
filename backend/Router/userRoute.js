@@ -2,6 +2,11 @@ const express = require("express");
 const router = express.Router();
 const user = require("../schema/user");
 const gatepass = require("../schema/gatepass");
+const menuSchema = require("../schema/menuSchema");
+
+const checkUser = require("../common/checkuser");
+const constants = require("../constants/constants");
+
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const crypto = require("crypto");
@@ -31,7 +36,7 @@ router.post("/login", async (req, res) => {
     secure: true,
   });
 
-  res.json({ response, status: true });
+  res.status(constants.SUCCESS).json({ response, status: true });
 });
 
 router.post("/newgatepass", async (req, res) => {
@@ -41,19 +46,18 @@ router.post("/newgatepass", async (req, res) => {
   // console.log(formData);
 
   try {
-    let token = req.cookies.isUser;
-    // console.log(token);
-    if (!token) {
-      return res.status(404).json({ added: false });
+    
+    if (!checkUser(req)) {
+      return res.status(constants.UNAUTHORISED).json({ added: false });
     }
 
-    let user = jwt.verify(token, process.env.SECRET_KEY)._doc;
+    let user = jwt.verify(req.cookies.isUser, process.env.SECRET_KEY)._doc;
     if (!user) {
-      return res.status(404).json({ added: false });
+      return res.status(constants.UNAUTHORISED).json({ added: false });
     }
     let gatepassHistory = await gatepass.findOne({ userid: user._id });
     if (!gatepassHistory) {
-      return res.status(404).json({ added: false });
+      return res.status(constants.NOTFOUND).json({ added: false });
     }
 
     let userGatepass = gatepassHistory.history;
@@ -67,7 +71,7 @@ router.post("/newgatepass", async (req, res) => {
     };
     userGatepass.push(gatepassObject);
     await gatepass.updateOne({ userid: user._id }, { history: userGatepass });
-    res.status(200).json({ added: true });
+    res.status(constants.SUCCESS).json({ added: true });
   } catch (err) {
     console.log(err);
   }
@@ -75,29 +79,42 @@ router.post("/newgatepass", async (req, res) => {
 
 router.get("/gatepass-history", async (req, res) => {
   try {
-    let token = req.cookies.isUser;
-    if (!token) {
-      return res.status(404);
+    
+    if (!checkUser(req)) {
+      return res.status(constants.UNAUTHORISED);
     }
-
-    let user = jwt.verify(token, process.env.SECRET_KEY)._doc;
+    
+    let user = jwt.verify(req.cookies.isUser, process.env.SECRET_KEY)._doc;
     if (!user) {
-      return res.status(404);
+      return res.status(constants.UNAUTHORISED);
     }
     let gatepassHistory = await gatepass.findOne({ userid: user._id });
     if (!gatepassHistory) {
-      return res.status(404);
+      return res.status(constants.NOTFOUND);
     }
 
     let userGatepass = gatepassHistory.history;
-    res.status(200).json({gatepasses:userGatepass});
+    res.status(constants.SUCCESS).json({ gatepasses: userGatepass });
   } catch (err) {
     console.log(err);
   }
 });
 
-router.get("/manu",async(req,res)=>{
-  
-})
+router.get("/menu", async (req, res) => {
+
+  console.log("Stating Menu Endpoint");
+  try{
+
+    if(!checkUser(req)){
+      return res.status(constants.UNAUTHORISED);
+    }
+    let menuTable = await menuSchema.find({});
+    console.log("Menu table : " ,menuTable);
+    return res.status(constants.SUCCESS).json({menuTable});
+  }catch(err){
+    console.log("Some error occured " ,err);
+    return res.status(constants.SERVERERROR).json({userMessage : "Internl issue please try again.."})
+  } 
+});
 
 module.exports = router;

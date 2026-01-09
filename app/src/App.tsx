@@ -3,7 +3,7 @@ import Home from "./pages/Home";
 import Getpass from "./pages/Getpass";
 import { Route, Routes, useNavigate } from "react-router-dom";
 import GatepassHistory from "./pages/GetpassHistory";
-import Manu from "./pages/Manu";
+import Manu from "./pages/Menu";
 import Fees from "./pages/Fees";
 import CreateUser from "./pages/Admin/CreateUser";
 import { useEffect, useState, createContext } from "react";
@@ -73,6 +73,7 @@ function App() {
             <Route path="manu" element={isAuth && isStudent ? <Manu /> : <Login setAuth={setAuth} setUser={setUser} />}></Route>
             <Route path="fees" element={isAuth && isStudent ? <Fees /> : <Login setAuth={setAuth} setUser={setUser} />}></Route>
             <Route path="complaints" element={isAuth && isStudent ? <Fees /> : <Login setAuth={setAuth} setUser={setUser} />}></Route>
+            <Route path="fine" element={isAuth && isStudent ? <Fees/> : <Login setAuth={setAuth} setUser={setUser} />}></Route>
           </Route>
           <Route path="/Admin">
             <Route path="home" element={isAdmin && isAuth ? <Home user={userData} /> : <Login setAuth={setAuth} setUser={setUser} />}></Route>

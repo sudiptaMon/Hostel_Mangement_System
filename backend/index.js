@@ -12,6 +12,7 @@ const user_router = require("./Router/userRoute");
 const admin_router = require("./Router/adminRoute");
 const cookie_parser = require("cookie-parser");
 const jwt = require("jsonwebtoken");
+const port = process.env.PORT || 5000;
 
 client.connect(`${process.env.DB_URI}`).then(() => {
   console.log("DB Connected");
@@ -62,6 +63,6 @@ app.get("/authenticate", async (req, res) => {
   }
 });
 
-app.listen(5000, () => {
+app.listen(port, () => {
   console.log("Server started");
 });

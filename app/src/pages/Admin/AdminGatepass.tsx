@@ -1,4 +1,3 @@
-import { Link } from "react-router-dom";
 import Navigation from "../../components/Navigation";
 import { useEffect, useState } from "react";
 import axios from "axios";
@@ -30,7 +29,7 @@ export default function AdminGatepass() {
 
     useEffect(() => {
         const getGatepassData = async () => {
-            let response = await axios.get("http://localhost:5000/Admin/gatepass");
+            let response = await axios.get("http://localhost:5000/Admin/gatepass",{withCredentials : true});
             if (!response.data) {
                 return;
             }

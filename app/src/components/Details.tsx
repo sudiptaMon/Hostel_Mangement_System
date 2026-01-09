@@ -19,7 +19,7 @@ export default class Details extends React.Component<PropsType> {
 
     return (
       <div className="flex flex-col sm:flex-row gap-5 bg-white w-[90%] h-fit p-4 items-center justify-center my-5 mx-auto rounded-md shadow-lg">
-        {/* Uncomment the img component if you intend to use it */}
+        
         {/* <img
           src={userDetails.profilePicture || "default-image.jpg"}
           alt="User"
