@@ -1,4 +1,4 @@
-import axios from "axios";
+import api from "../../lib/api";
 import { useEffect, useState } from "react";
 import Navigation from "../../components/Navigation";
 
@@ -15,11 +15,9 @@ export default function CreateUser() {
     e.preventDefault();
     
     try {
-      const res = await axios.post(
-        "http://localhost:5000/Admin/createuser",
-        { name, email, password, username, room, batch },
-        { withCredentials: true }
-      );
+      const res = await api.post("/Admin/createuser", {
+        name, email, password, username, room, batch
+      });
       // console.log(res);
       if (res.data?.added) {
         setMessage("User Successfully Added");

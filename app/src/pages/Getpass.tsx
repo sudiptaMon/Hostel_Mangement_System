@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import Navigation from '../components/Navigation';
-import axios from 'axios';
+import api from '../lib/api';
 import { useNavigate } from 'react-router-dom';
 
 const GatepassRequestForm = () => {
@@ -55,7 +55,7 @@ const GatepassRequestForm = () => {
     }
 
 
-    let response = await axios.post("http://localhost:5000/Student/newgatepass", { formData }, { withCredentials: true })
+    let response = await api.post("/Student/newgatepass", { formData })
     if (!response.data.added) {
       setMessage("Something Went Wrong");
       return;

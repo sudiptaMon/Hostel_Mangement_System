@@ -7,7 +7,7 @@ import Manu from "./pages/Menu";
 import Fees from "./pages/Fees";
 import CreateUser from "./pages/Admin/CreateUser";
 import { useEffect, useState, createContext } from "react";
-import axios from "axios";
+import api from "./lib/api";
 import Logout from "./pages/Logout";
 import AdminGatepass from "./pages/Admin/AdminGatepass";
 import AddManu from "./pages/Admin/AddManu";
@@ -37,9 +37,7 @@ function App() {
   useEffect(() => {
     const authentication = async () => {
       try {
-        let response = await axios.get("http://localhost:5000/authenticate", {
-          withCredentials: true
-        });
+        let response = await api.get("/authenticate");
         if (response.data.isAuthenticated) {
           setAuth(true);
           setUser(response.data.user);
@@ -80,6 +78,8 @@ function App() {
             <Route path="userentry" element={isAdmin && isAuth ? <CreateUser /> : <Login setAuth={setAuth} setUser={setUser} />}></Route>
             <Route path="gatepass" element={isAdmin && isAuth ? <AdminGatepass /> : <Login setAuth={setAuth} setUser={setUser} />}></Route>
             <Route path="manu" element={isAuth && isAdmin ? <AddManu /> : <Login setAuth={setAuth} setUser={setUser} />}></Route>
+            <Route path="fees" element={isAuth && isAdmin ? <Fees /> : <Login setAuth={setAuth} setUser={setUser} />}></Route>
+            <Route path="fines" element={isAuth && isAdmin ? <Fees /> : <Login setAuth={setAuth} setUser={setUser} />}></Route>
           </Route>
           <Route path="*" element={<Login setAuth={setAuth} setUser={setUser} />}>
 

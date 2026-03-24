@@ -25,7 +25,7 @@ export default function Navigation() {
           <Link to="/Student/manu">
             <li className="hover:text-blue-600 transition-colors duration-200">Manu</li>
           </Link>
-          <Link to="/Student/fines">
+          <Link to="/Student/fine">
             <li className="hover:text-blue-600 transition-colors duration-200">Fines</li>
           </Link>
           <Link to="/logout">
