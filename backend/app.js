@@ -50,7 +50,7 @@ app.use("/Admin", adminRouter);
 app.get("/health", async (req, res) => {
   const mongoState = require("mongoose").connection.readyState;
   const dbStatus = mongoState === 1 ? "up" : "down";
-
+  console.log(process.env.DB_URI);
   return res.status(200).json({
     status: dbStatus === "up" ? "ok" : "degraded",
     environment: NODE_ENV,
