@@ -12,28 +12,33 @@ export default function Login({ setAuth, setUser }: loginProps) {
   const [password, setPassword] = useState("");
   const [errmessage, setErrmessage] = useState("");
   const [role, setRole] = useState("Student");
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
 
 
   const handleForm = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-
+    setLoading(true); // start loading
+  
     try {
       const response = await api.post(`/${role}/login`, {
         username: user,
         password
-      })
+      });
+  
       if (response.data.status) {
         setAuth(true);
         setUser(response.data.response);
-        navigate(`/${role}/home`)
+        navigate(`/${role}/home`);
       } else {
-        setErrmessage("Invalid username/password")
+        setErrmessage("Invalid username/password");
       }
     } catch (error) {
       console.error("Error logging in:", error);
       setErrmessage("Invalid username or password.");
+    } finally {
+      setLoading(false); // stop loading
     }
   };
 
@@ -87,11 +92,16 @@ export default function Login({ setAuth, setUser }: loginProps) {
           Forget your password? <a href="/" className="text-blue-600 hover:underline">Click Here</a>
         </span>
         <button
-          type="submit"
-          className="w-full p-3 mt-4 bg-green-500 text-white rounded-md border border-green-600 hover:bg-green-600 transition-colors duration-200"
-        >
-          Login
-        </button>
+  type="submit"
+  disabled={loading}
+  className={`w-full p-3 mt-4 text-white rounded-md border transition-colors duration-200 
+    ${loading 
+      ? "bg-gray-400 border-gray-400 cursor-not-allowed" 
+      : "bg-green-500 border-green-600 hover:bg-green-600"
+    }`}
+>
+  {loading ? "Logging in..." : "Login"}
+</button>
       </form>
 
       {errmessage && <p className="mt-4 text-red-600">{errmessage}</p>}
