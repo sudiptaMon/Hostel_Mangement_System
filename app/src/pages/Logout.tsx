@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import axios from "axios";
+import api from "../lib/api";
 import { useNavigate } from "react-router-dom";
 import { userType } from "../App";
 type logoutProps = {
@@ -13,7 +13,7 @@ export default function Logout({ setAuth, setUser, setStudent, setAdmin }: logou
     useEffect(() => {
         const logout = async () => {
             try {
-                await axios.get("http://localhost:5000/logout", { withCredentials: true });
+                await api.get("/logout");
                 setAuth(false);
                 setUser(null);
                 setStudent(false);

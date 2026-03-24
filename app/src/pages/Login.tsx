@@ -1,5 +1,5 @@
 import { useState } from "react";
-import axios from "axios";
+import api from "../lib/api";
 import { useNavigate } from "react-router-dom";
 import { userType } from "../App"
 type loginProps = {
@@ -20,11 +20,9 @@ export default function Login({ setAuth, setUser }: loginProps) {
     e.preventDefault();
 
     try {
-      const response = await axios.post(`http://localhost:5000/${role}/login`, {
+      const response = await api.post(`/${role}/login`, {
         username: user,
         password
-      }, {
-        withCredentials: true
       })
       if (response.data.status) {
         setAuth(true);

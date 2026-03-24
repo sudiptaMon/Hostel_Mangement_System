@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from "react-router-dom";
 import Navigation from '../components/Navigation';
-import axios from 'axios';
+import api from '../lib/api';
 
 // const gatepassData = [
 //     {
@@ -39,7 +39,7 @@ const GatepassHistory = () => {
     useEffect(() => {
         const getGatepassData = async () => {
             try {
-                let response = await axios.get("http://localhost:5000/Student/gatepass-history", { withCredentials: true });
+                let response = await api.get("/Student/gatepass-history");
                 if (!response) {
                     return;
                 }

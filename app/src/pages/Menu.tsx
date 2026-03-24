@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import axios from "axios";
+import api from "../lib/api";
 
 import {MenuItem} from "../types/Types"
 import ManueTable from "../components/ManueTable"
@@ -10,7 +10,7 @@ export default function Menu(){
      useEffect(() => {
     console.log("Inside use effect");
     const fetchMenu = async () => {
-        const menuDetails = await axios.get("http://localhost:5000/Student/menu",{ withCredentials: true });
+        const menuDetails = await api.get("/Student/menu");
         if(!menuDetails || !menuDetails.data){
             return;
         }

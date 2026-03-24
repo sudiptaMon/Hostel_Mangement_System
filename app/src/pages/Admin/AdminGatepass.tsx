@@ -1,6 +1,6 @@
 import Navigation from "../../components/Navigation";
 import { useEffect, useState } from "react";
-import axios from "axios";
+import api from "../../lib/api";
 
 type gatepassEntry = {
     applyFor: string;
@@ -29,21 +29,25 @@ export default function AdminGatepass() {
 
     useEffect(() => {
         const getGatepassData = async () => {
-            let response = await axios.get("http://localhost:5000/Admin/gatepass",{withCredentials : true});
-            if (!response.data) {
-                return;
+            try {
+                let response = await api.get("/Admin/gatepass");
+                if (!response.data) {
+                    return;
+                }
+                setGatepassData(response.data);
+            } catch (err) {
+                console.log(err);
             }
-            setGatepassData(response.data);
         }
         getGatepassData();
-    }, [gatepassData]);
+    }, []);
 
     const handleApprove = async (id: string, userid: string, outTime: string, inTime: string) => {
         
         
 
         try {
-            let response = await axios.post("http://localhost:5000/Admin/approvegatepass", { id, userid, approved: true, comment }, { withCredentials: true });
+            let response = await api.post("/Admin/approvegatepass", { id, userid, approved: true, comment });
             if (!response.data.done) {
                 return;
             }
@@ -58,7 +62,7 @@ export default function AdminGatepass() {
 
     const handleReject = async (id: string, userid: string) => {
         try {
-            let response = await axios.post("http://localhost:5000/Admin/rejectgatepass", { id, userid, approved: false, comment }, { withCredentials: true });
+            let response = await api.post("/Admin/rejectgatepass", { id, userid, approved: false, comment });
             if (!response.data.done) {
                 return;
             }
