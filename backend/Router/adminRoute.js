@@ -4,53 +4,61 @@ const admin = require("../schema/admin");
 const user = require("../schema/user");
 const gatepass = require("../schema/gatepass");
 const checkDatabase = require("../validators/checkDatabase");
-const checkUser = require("../common/checkuser");
 const constants = require("../constants/constants");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const bodyParser = require("body-parser");
 const date = new Date();
 const cookieParser = require("cookie-parser");
+const verifyToken = require("../middleware/verifyToken");
+const requireRole = require("../middleware/requireRole");
+const validateRequest = require("../middleware/validateRequest");
+const {
+  adminLoginValidation,
+  createUserValidation,
+  gatepassActionValidation,
+} = require("../validators/adminValidators");
+const { SECRET_KEY, NODE_ENV } = require("../config/env");
+const { COOKIE_NAME, cookieOptions } = require("../config/cookie");
 router.use(bodyParser.json());
 router.use(cookieParser());
 
-router.post("/login", async (req, res) => {
+router.post("/login", adminLoginValidation, validateRequest, async (req, res) => {
   const { username, password } = req.body;
   let response = await admin.findOne({ username });
 
   if (!response) {
     return res.send({ status: false });
   }
-  if (password != response.password) {
+  if (!bcrypt.compareSync(password, response.password)) {
     return res.send({ status: false });
   }
-  // if (!bcrypt.compareSync(password, response.password)) {
-  //   return res.send({ status: false });
-  // }
+
+  const tokenPayload = {
+    id: String(response._id),
+    role: response.role,
+    username: response.username,
+    name: response.name,
+  };
   response.password = undefined;
-  let token = jwt.sign({ ...response }, process.env.SECRET_KEY, {
+  let token = jwt.sign(tokenPayload, SECRET_KEY, {
     expiresIn: "24h",
   });
-  res.cookie("isUser", token, {
-    httpOnly: true,
-    maxAge: 24 * 60 * 60 * 1000,
-    sameSite: "none",
-    secure: true,
-  });
+  res.cookie(COOKIE_NAME, token, cookieOptions);
 
   res.send({ response, status: true });
 });
 
-router.post("/createuser", async (req, res) => {
+router.post(
+  "/createuser",
+  verifyToken,
+  requireRole("Admin"),
+  createUserValidation,
+  validateRequest,
+  async (req, res) => {
   try {
     const { name, email, password, username, room, batch } = req.body;
 
-    if (req.body == {}) {
-      return res.status(400).json({
-        added: false,
-        massage: "No data Entered !",
-      });
-    }
     const isUserExists = await checkDatabase.isUserExists(username);
 
     if (isUserExists) {
@@ -85,13 +93,11 @@ router.post("/createuser", async (req, res) => {
       .status(constants.SERVERERROR)
       .json({ added: false, message: "Can't be added. Something went wrong" });
   }
-});
+  }
+);
 
-router.get("/gatepass", async (req, res) => {
+router.get("/gatepass", verifyToken, requireRole("Admin"), async (req, res) => {
   try {
-    if (!checkUser(req)) {
-      return res.status(constants.UNAUTHORISED).json({ added: false });
-    }
     let allgatepass = await gatepass.find({});
     let todayDate =
       date.getDate() + "/" + (date.getMonth() + 1) + "/" + date.getFullYear();
@@ -110,64 +116,83 @@ router.get("/gatepass", async (req, res) => {
     });
     res.json(gatepassHistory);
   } catch (err) {
-    console.log(err);
+    if (NODE_ENV !== "production") {
+      console.log(err);
+    }
+    return res
+      .status(constants.SERVERERROR)
+      .json({ done: false, message: "Internal server error" });
   }
 });
 
-router.post("/approvegatepass", async (req, res) => {
+router.post(
+  "/approvegatepass",
+  verifyToken,
+  requireRole("Admin"),
+  gatepassActionValidation,
+  validateRequest,
+  async (req, res) => {
   let { userid, id, approved, comment } = req.body;
   try {
-    let token = req.cookies.isUser;
-    if (!checkUser(req)) {
-      return res.status(constants.UNAUTHORISED).json({ done: false });
-    }
-    let admin = await jwt.verify(token, process.env.SECRET_KEY)._doc;
     let gatepassEntity = await gatepass.findOne({ userid: userid });
     if (!gatepassEntity) {
-      res.status(404).json({ done: false });
+      return res.status(404).json({ done: false });
     }
     let gatepassOfUser = gatepassEntity.history;
 
     gatepassOfUser.forEach((ele) => {
       if (ele.id === id && approved) {
         ele.status = "APPROVED";
-        ele.permitBy = admin.name;
+        ele.permitBy = req.user.name;
         ele.comment = comment;
       }
     });
     await gatepass.updateOne({ userid: userid }, { history: gatepassOfUser });
     res.status(constants.SUCCESS).json({ done: true });
   } catch (err) {
-    console.log(err);
+    if (NODE_ENV !== "production") {
+      console.log(err);
+    }
+    return res
+      .status(constants.SERVERERROR)
+      .json({ done: false, message: "Internal server error" });
   }
-});
+  }
+);
 
-router.post("/rejectgatepass", async (req, res) => {
+router.post(
+  "/rejectgatepass",
+  verifyToken,
+  requireRole("Admin"),
+  gatepassActionValidation,
+  validateRequest,
+  async (req, res) => {
   let { userid, id, approved, comment } = req.body;
   try {
-    let token = req.cookies.isUser;
-    if (!checkUser(req)) {
-      return res.status(constants.UNAUTHORISED).json({ done: false });
-    }
-    let admin = await jwt.verify(token, process.env.SECRET_KEY)._doc;
     let gatepassEntity = await gatepass.findOne({ userid: userid });
     if (!gatepassEntity) {
-      res.status(constants.NOTFOUND).json({ done: false });
+      return res.status(constants.NOTFOUND).json({ done: false });
     }
     let gatepassOfUser = gatepassEntity.history;
 
     gatepassOfUser.forEach((ele) => {
       if (ele.id === id && !approved) {
         ele.status = "REJECTED";
-        ele.permitBy = admin.name;
+        ele.permitBy = req.user.name;
         ele.comment = comment;
       }
     });
     await gatepass.updateOne({ userid: userid }, { history: gatepassOfUser });
     res.status(constants.SUCCESS).json({ done: true });
   } catch (err) {
-    console.log(err);
+    if (NODE_ENV !== "production") {
+      console.log(err);
+    }
+    return res
+      .status(constants.SERVERERROR)
+      .json({ done: false, message: "Internal server error" });
   }
-});
+  }
+);
 
 module.exports = router;
