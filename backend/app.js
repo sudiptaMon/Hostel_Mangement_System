@@ -13,11 +13,7 @@ const { notFoundHandler, errorHandler } = require("./middleware/errorHandler");
 const requestLogger = require("./middleware/requestLogger");
 const { authRateLimiter, apiRateLimiter } = require("./middleware/rateLimit");
 const connectDB = require("./config/db");
-const {
-  CLIENT_ORIGINS,
-  NODE_ENV,
-  IS_PRODUCTION,
-} = require("./config/env");
+const { CLIENT_ORIGINS, NODE_ENV, IS_PRODUCTION } = require("./config/env");
 const { COOKIE_NAME } = require("./config/cookie");
 
 const app = express();
@@ -35,7 +31,7 @@ app.use(
     },
     methods: ["GET", "POST", "PUT", "DELETE"],
     credentials: true,
-  })
+  }),
 );
 app.use(cookieParser());
 app.use(bodyParser.json());
@@ -66,7 +62,12 @@ app.post("/logout", (req, res) => {
     secure: IS_PRODUCTION,
   });
 
-
+  res.set(
+    "Cache-Control",
+    "no-store, no-cache, must-revalidate, proxy-revalidate",
+  );
+  res.set("Pragma", "no-cache");
+  res.set("Expires", "0");
   res.status(200).json({ success: true });
 });
 
