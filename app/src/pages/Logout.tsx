@@ -14,11 +14,7 @@ export default function Logout({ setAuth, setUser, setStudent, setAdmin }: logou
         
         const logout = async () => {
             try {
-                await api.post("/logout", null, {
-                    headers: {
-                        "Cache-Control": "no-cache",
-                    },
-                });
+                await api.post("/logout");
                 setAuth(false);
                 setUser(null);
                 setStudent(false);

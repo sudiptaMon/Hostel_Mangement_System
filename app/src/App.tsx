@@ -37,7 +37,7 @@ function App() {
   useEffect(() => {
     const authentication = async () => {
       try {
-        let response = await api.get("/authenticate");
+        let response = await api.post("/authenticate");
         if (response.data.isAuthenticated) {
           setAuth(true);
           setUser(response.data.user);
