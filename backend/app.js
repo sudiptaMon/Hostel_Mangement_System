@@ -95,5 +95,4 @@ app.post("/authenticate", verifyToken, async (req, res) => {
 
 app.use(notFoundHandler);
 app.use(errorHandler);
-app.set('trust proxy',true);
 module.exports = app;
