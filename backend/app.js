@@ -66,14 +66,11 @@ app.post("/logout", (req, res) => {
     secure: IS_PRODUCTION,
   });
 
-  res.set("Cache-Control", "no-store, no-cache, must-revalidate, proxy-revalidate");
-  res.set("Pragma", "no-cache");
-  res.set("Expires", "0");
 
   res.status(200).json({ success: true });
 });
 
-app.get("/authenticate", verifyToken, async (req, res) => {
+app.post("/authenticate", verifyToken, async (req, res) => {
   try {
     let userData;
     if (req.user.role === "Student") {
@@ -98,5 +95,5 @@ app.get("/authenticate", verifyToken, async (req, res) => {
 
 app.use(notFoundHandler);
 app.use(errorHandler);
-app.set('trust proxy', 1);
+app.set('trust proxy',true);
 module.exports = app;
