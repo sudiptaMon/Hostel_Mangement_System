@@ -59,13 +59,18 @@ app.get("/health", async (req, res) => {
   });
 });
 
-app.get("/logout", (req, res) => {
+app.post("/logout", (req, res) => {
   res.clearCookie(COOKIE_NAME, {
     httpOnly: true,
     sameSite: IS_PRODUCTION ? "none" : "lax",
     secure: IS_PRODUCTION,
   });
-  res.sendStatus(200);
+
+  res.set("Cache-Control", "no-store, no-cache, must-revalidate, proxy-revalidate");
+  res.set("Pragma", "no-cache");
+  res.set("Expires", "0");
+
+  res.status(200).json({ success: true });
 });
 
 app.get("/authenticate", verifyToken, async (req, res) => {
@@ -93,5 +98,5 @@ app.get("/authenticate", verifyToken, async (req, res) => {
 
 app.use(notFoundHandler);
 app.use(errorHandler);
-
+app.set('trust proxy', 1);
 module.exports = app;
