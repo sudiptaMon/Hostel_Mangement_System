@@ -14,7 +14,7 @@ export default function Logout({ setAuth, setUser, setStudent, setAdmin }: logou
         
         const logout = async () => {
             try {
-                await api.post("/logout", {}, { withCredentials: true });
+                await api.post("/logout");
                 setAuth(false);
                 setUser(null);
                 setStudent(false);
